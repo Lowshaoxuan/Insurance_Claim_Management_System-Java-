@@ -6,7 +6,7 @@ public class Administrator extends User {
 
 
     char roleNo;
-    private int count = 000;
+    private int count = 1;
     String uId;
     String path = "users.txt";
 
@@ -19,7 +19,7 @@ public class Administrator extends User {
 
     @Override
     public String setUid(){
-        this.uId = this.roleNo + String.valueOf(count);
+        this.uId = this.roleNo + String.format("%04d",count);
         count++;
         return uId;
     }
