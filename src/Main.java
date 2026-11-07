@@ -11,11 +11,10 @@ public class Main{
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args){
-
+        StringBuffer sb = new StringBuffer("Hello");
+        sb.setLength(2);
+        System.out.println(sb);
         landing();
-
-
-
     }
     public static void landing(){
 
@@ -47,7 +46,6 @@ public class Main{
                 default -> System.out.println("Invalid Option\n");
             }
         }
-
     }
 
     public static void loginPage(){
@@ -55,6 +53,8 @@ public class Main{
         String lEmail;
         String lPass;
 
+        System.out.println();
+        System.out.println("Enter your login credential here: ");
         System.out.print("Email: ");
         lEmail = scanner.nextLine();
 
@@ -73,7 +73,12 @@ public class Main{
         lPass = scanner.nextLine();
 
         if (checkpass(lEmail, lPass)) {
-            System.out.println("Login Successfully. Navigate to Home Page");
+            System.out.println("Login Successfully. Navigate to Home Page\n");
+            try {
+                Thread.sleep(1400);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             char role = getUserRole(lEmail);
             homepage(role,lEmail);
         } else {
@@ -107,9 +112,7 @@ public class Main{
         char option = '!';
 
         while(option != '6') {
-
-            System.out.println("Welcome to Home Page");
-            System.out.println("====Customer Menu====\n");
+            System.out.println("====Customer Menu====");
             System.out.println("1. View Profile");
             System.out.println("2. Manage Vehicle");
             System.out.println("3. View Policy");
@@ -117,14 +120,200 @@ public class Main{
             System.out.println("5. View Claims");
             System.out.println("6. Logout\n");
 
-            System.out.println("Enter your option here: ");
+            System.out.print("Enter your option here: ");
             option = scanner.nextLine().charAt(0);
-
             switch (option){
                 case '1' -> showUserInfo(email);
+                case '2' -> showVehicle(getUserId(email));
+                case '3' -> showPolicy(getUserId(email));
             }
         }
 
+    }
+
+    private static void showPolicy(String userId) {
+
+        try(BufferedReader reader = new BufferedReader(new FileReader("policy.txt"))){
+
+            String line;
+
+            while((line = reader.readLine()) != null){
+
+                String [] data = line.split(",");
+
+
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static String getUserId(String email) {
+
+        try(BufferedReader reader = new BufferedReader(new FileReader("users.txt"))){
+            String line;
+
+            while((line = reader.readLine()) != null){
+                String data [] = line.split(",");
+
+                if(data[1].equals(email)){
+                    return data[5];
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    private static void showVehicle(String uId) {
+
+        try(BufferedReader reader = new BufferedReader(new FileReader("vehicles.txt"))){
+            String line;
+
+            while((line = reader.readLine()) != null){
+                String [] data = line.split(",");
+
+                if(data[5].equals(uId)){
+                    System.out.println();
+                    System.out.println("-----------MY VEHICLE-----------");
+                    System.out.println("Vehicle ID: " + data[0]);
+                    System.out.println("Registration: " + data[1]);
+                    System.out.println("Manufacturer: " + data[2]);
+                    System.out.println("Model: " + data[3]);
+                    System.out.println("Year: " + data[4]+"\n");
+                }else {
+                    char option;
+                    boolean stay = true;
+
+                    while(stay) {
+                        System.out.println();
+                        System.out.println("There's no vehicle registered under you. " +
+                                "Would you like to register now? Click 'Y' to register or 'B' to back to menu");
+                        System.out.print("Enter your option here: ");
+                        option = scanner.nextLine().toUpperCase().charAt(0);
+                        System.out.println();
+                        if (option == 'B'){
+                            stay = false;
+                            customerhome(getUserEmail(uId));
+                        } else if (option == 'Y') {
+                            registerVehicle(getUserEmail(uId));
+                        }
+                    }
+                }
+            }
+            boolean stay = true;
+            char option;
+            while(stay) {
+                System.out.println("Enter 'Y' if you want to register a new vehicle or 'B' to back to Customer Menu");
+                System.out.print("Option: ");
+                option = scanner.nextLine().toUpperCase().charAt(0);
+
+                switch(option){
+                    case 'Y' -> {
+                        System.out.println();
+                        registerVehicle(getUserEmail(uId));
+                    }
+                    case 'B' -> {
+                        System.out.println("Navigate to Customer Home Page...");
+                        Thread.sleep(2000);
+                        customerhome(getUserEmail(uId));
+                    }
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void registerVehicle(String email) {
+        String [] tempinfo = new String [4];
+        String registerNo;
+        String manufacturer;
+        String model;
+        int year;
+        boolean empty = true;
+        String uId = getUserId(email);
+
+        while (empty) {
+            System.out.println("Please Fill in your vehicle's info at bellow and can't fill with blank or space.");
+            System.out.print("Register Number: ");
+            registerNo = scanner.nextLine();
+            if (checkRegisterNo(registerNo)) {
+                System.out.println("Register Number must be unique!\n");
+                break;
+            }
+            tempinfo[0] = registerNo;
+
+            System.out.print("Manufacturer: ");
+            manufacturer = scanner.nextLine();
+            tempinfo[1] = manufacturer;
+
+            System.out.print("Model: ");
+            model = scanner.nextLine();
+            tempinfo[2] = model;
+
+            System.out.print("Year: ");
+            year = scanner.nextInt();
+            scanner.nextLine();
+            tempinfo[3] = String.valueOf(year);
+
+            if (!Arrays.asList(tempinfo).contains(" ")) {
+                empty = false;
+                Vehicle vehicle = new Vehicle(registerNo, manufacturer, model, year, uId);
+                vehicle.setUid();
+                vehicle.saveVehicle();
+                System.out.println("Register Successfully");
+                System.out.println("Navigate back to Customer Home Page");
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                customerhome(getUserEmail(uId));
+            }
+        }
+    }
+
+    private static boolean checkRegisterNo(String registerNo) {
+        try (BufferedReader reader =
+                     new BufferedReader(new FileReader("vehicles.txt"))) {
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+
+                String[] data = line.split(",");
+
+                if (data[1].equals(registerNo)) {
+                    return true;
+                }
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return false;
+    }
+
+    private static String getUserEmail(String uId) {
+
+        try(BufferedReader reader = new BufferedReader(new FileReader("users.txt"))){
+            String line;
+
+            while((line = reader.readLine()) != null){
+                String data [] = line.split(",");
+
+                if(data[5].equals(uId)){
+                    return data[1];
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
     }
 
     private static void showUserInfo(String email) {
@@ -136,14 +325,20 @@ public class Main{
                 String [] data = line.split(",");
 
                 if(data[1].equals(email)){
+                    System.out.println();
                     System.out.println("Name: " + data[0]);
                     System.out.println("Email: " + data[1]);
                     System.out.println("Password: " + data[2]);
                     System.out.println("Phone Number: " + data[3]);
-                    System.out.println("Customer ID: " + data[5]);
+                    System.out.println("Customer ID: " + data[5]+"\n");
                 }
             }
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
@@ -182,7 +377,6 @@ public class Main{
     }
 
     public static void registerInfo(int registerRole){
-
 
         String [] tempinfo = new String[4];
         boolean empty = true;
@@ -302,36 +496,11 @@ public class Main{
         return false;
     }
 
-    /*
-    public static User getUser(String email){
-        try(BufferedReader reader = new BufferedReader(new FileReader("users.txt"))){
-            String line = reader.readLine(); ;
-
-            while(line != null ){
-
-                String [] data = line.split(",");
-
-                if(data[1].equals(email)){
-                    char role = data[4].charAt(0);
-                    if (data[4].equals('C')) {
-                        return new Customer(data[0], data[1], data[2], data[3],role);
-                    } else if () {
-                        
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
-    }*/
-
     public static char getUserRole(String email){
         try(BufferedReader reader = new BufferedReader(new FileReader("users.txt"))){
-            String line = reader.readLine();
+            String line;
 
-            while(line != null){
-
+            while((line = reader.readLine()) != null){
                 String [] data = line.split(",");
 
                 if(data[1].equals(email)){

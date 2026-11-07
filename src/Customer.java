@@ -29,7 +29,6 @@ public class Customer extends User {
     }
 
     private void writeid(int count){
-
         try(FileWriter writer = new FileWriter(idpath,true)){
             writer.write(String.valueOf(count));
             writer.write(System.lineSeparator());
