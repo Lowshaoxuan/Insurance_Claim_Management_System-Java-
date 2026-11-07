@@ -103,7 +103,7 @@ Insurance_Claim_Management_System/
 1. Clone the repository:
 
    ```bash
-   git clone [YOUR_REPOSITORY_URL](https://github.com/Lowshaoxuan/Insurance_Claim_Management_System-Java-.git)
+   git clone https://github.com/Lowshaoxuan/Insurance_Claim_Management_System-Java-.git
    ```
 
 2. Open the project in IntelliJ IDEA.
